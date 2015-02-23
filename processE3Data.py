@@ -25,12 +25,20 @@ class E3Data:
 		self.samplingRate =  float (samplingRate)
 		self.data = data
 
-	def toString(self):
-		return "Data Type: %s Start Time:%s SamplingRate %s" %(self.dataType,self.startTime,self.samplingRate)
-
+	def toString(self,unixTime=True):
+		if(unixTime):
+			return "Data Type: %s, Start Time:%s, End Time:%s  SamplingRate %s" %(self.dataType,self.startTime,self.getEndTime(),self.samplingRate)
+		else:
+			_string = "Data Type: %s, Start Time:%s, End Time:%s  SamplingRate %s" %(
+					self.dataType,datetime.datetime.fromtimestamp(self.startTime)
+					,datetime.datetime.fromtimestamp( float(self.getEndTime())),self.samplingRate)
+			return _string
 	def getData(self):
 		return self.data
-
+	def getEndTime(self):
+		_startDateTime = datetime.datetime.fromtimestamp(self.startTime)
+		_endDateTime = _startDateTime +  datetime.timedelta (seconds=len(self.data) / self.samplingRate )
+		return  _endDateTime.strftime("%s")
 	def getSlide(self, start,end):
 		_slideStartTime = datetime.datetime.fromtimestamp( self.startTime) 
 		_slideStartTime = _slideStartTime + datetime.timedelta(seconds=start)
@@ -67,7 +75,3 @@ class E3Data:
 				_lineNumber += 1
 			return E3Data(_DATA_TYPE,_startTime,_samplingRate,_data)
 
-
-if __name__ == "__main__":
-	e3data = E3Data.newE3DataFromFilePath(E3Data,"ACC.csv","ACC")
-	print e3data.getSlide(90,100).saveToFile("test.csv")
